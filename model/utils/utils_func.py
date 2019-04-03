@@ -138,42 +138,6 @@ def powerlaw(x, eps=1e-6):
 # loss
 # --------------------------------------
 
-# def contrastive_loss(x, x2, label, margin=0.7, eps=1e-6):
-#     # x is D x N
-#     dim = x.size(0) # D
-#     nq = torch.sum(label.data==-1) # number of tuples
-#     S = x.size(1) // nq # number of images per tuple including query: 1+(1+n)
-#
-#     x1 = x[:, ::S].permute(1,0).repeat(1,S-1).view((S-1)*nq,dim).permute(1,0)
-#     idx = [i for i in range(len(label)) if label.data[i] != -1]
-#     x2 = x[:, idx]
-#     lbl = label[label!=-1]
-#
-#     dif = x1 - x2
-#     D = torch.pow(dif+eps, 2).sum(dim=0).sqrt()
-#
-#     y = 0.5*lbl*torch.pow(D,2) + 0.5*(1-lbl)*torch.pow(torch.clamp(margin-D, min=0),2)
-#     y = torch.sum(y)
-#     return y
-
-# def contrastive_loss(x1, x2, label,
-#                      margin=0.7, eps=1e-6, reduce=False):
-#     # x is N*D
-#     # lbl = label[label!=-1]
-#     neg_lbl = (label== -1).float()
-#     # pos_lbl = (label== 1).float()
-#
-#     dif = x1 - x2 # N*D
-#     D = torch.pow(dif+eps, 2).sum(dim=1).sqrt()
-#
-#     y = 0.5*neg_lbl*torch.pow(D,2) + 0.5*(1-neg_lbl)*torch.pow(torch.clamp(margin-D, min=0),2)
-#     # y = torch.sum(y)
-#     if reduce:
-#         return torch.mean(y)
-#     else:
-#         return torch.sum(y)
-#     # return y
-
 def contrastive_loss(total_x, total_label, pos_num, neg_num_for_loss,
                      margin=0.7, eps=1e-6, reduce=False):
 
@@ -230,45 +194,3 @@ def contrastive_loss(total_x, total_label, pos_num, neg_num_for_loss,
 
     return y
 
-#
-# bs, _, _ = total_x.size()
-# for i_x, x in enumerate(total_x):
-#     label = total_label[i_x]
-#     num, dim = x.size()
-#
-#     label = label.view(-1)
-#     num_label = label.size(0)
-#
-#     idx_combins = [c for c in combinations(range(num_label), 2)]
-#     idx_combins = torch.FloatTensor(idx_combins).squeeze(0)  # num_comb * 2 [(0,1),(0,2),(1,2)]
-#     idx1 = idx_combins[:, 0].long()
-#     idx2 = idx_combins[:, 1].long()
-#
-#     idx1 = Variable(idx1.cuda())
-#     idx2 = Variable(idx2.cuda())
-#
-#     # positive-sample wise
-#     pos_pair = (label[idx1] == label[idx2])  # >0
-#     pos_x1 = x[idx1[pos_pair], :]
-#     pos_x2 = x[idx2[pos_pair], :]
-#
-#     pos_diff = pos_x1 - pos_x2
-#     pos_D = torch.pow(pos_diff + eps, 2).sum(dim=1).sqrt()
-#     pos_loss = 0.5 * torch.pow(pos_D, 2)
-#
-#     # negtive-sample wise
-#     neg_inds = torch.nonzero(1 - pos_pair.cpu().data).squeeze(1)
-#     rand_num = torch.from_numpy(np.random.permutation(neg_inds.size(0))).long()
-#     neg_inds = Variable(neg_inds.cuda())
-#     rand_num = Variable(rand_num.cuda())
-#     dis_inds = neg_inds[rand_num[:neg_num_for_loss]]  # .squeeze(1)
-#
-#     neg_x1 = x[idx1[dis_inds], :]
-#     neg_x2 = x[idx2[dis_inds], :]
-#     neg_diff = neg_x1 - neg_x2
-#     neg_D = torch.pow(neg_diff + eps, 2).sum(dim=1).sqrt()
-#     neg_loss = 0.5 * torch.pow(torch.clamp(margin - neg_D, min=0), 2)
-#
-#     y = torch.sum(pos_loss) + torch.sum(neg_loss)
-#
-# return y
