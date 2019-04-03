@@ -32,7 +32,7 @@ class para_cfg(object):
 		self.TRAIN_transforms = transforms.Compose([
 			transforms.Resize((227, 227)),
 			transforms.ToTensor(),
-			transforms.Normalize((0.1307,), (0.3081,))
+			#transforms.Normalize((0.1307,), (0.3081,))
 		])
 		self.USE_TFBOARD = True
 		self.LOG_NAME = 'MNIST'
